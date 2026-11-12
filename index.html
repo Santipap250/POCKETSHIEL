@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OBIX POCKETSHIELD</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="theme-color" content="#060b1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#04101f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+  <div><h1>OBIX POCKETSHIELD</h1><small>เครื่องมือความปลอดภัยที่ทำงานในเครื่องคุณ</small></div>
+  <button id="theme" aria-label="สลับธีม">◐</button>
+</header>
+<main>
+<div class="priv"><b>ประมวลผลในเบราว์เซอร์เท่านั้น</b> รหัสผ่าน ไฟล์ และ URL ของคุณไม่ถูกส่งไปยังเซิร์ฟเวอร์ใด ๆ และไม่มีการเก็บข้อมูล</div>
+
+<section id="home" class="on">
+  <h2>เลือกเครื่องมือ</h2><p class="sub">ทุกเครื่องมือทำงานจริงในเครื่องของคุณ</p>
+  <div class="grid">
+    <button class="tile" data-go="pw"><b>สร้างรหัสผ่าน</b><span>สุ่มแบบปลอดภัย + Passphrase</span></button>
+    <button class="tile" data-go="aes"><b>เข้ารหัส AES-256</b><span>ข้อความและไฟล์</span></button>
+    <button class="tile" data-go="hash"><b>Hash และไฟล์</b><span>SHA-256 / 384 / 512</span></button>
+    <button class="tile" data-go="url"><b>ตรวจลิงก์</b><span>ประเมินความเสี่ยงเบื้องต้น</span></button>
+    <button class="tile" data-go="jwt"><b>JWT Inspector</b><span>ถอดรหัส ไม่ใช่การยืนยัน</span></button>
+    <button class="tile" data-go="hdr"><b>Security Headers</b><span>วิเคราะห์ที่คุณวางเข้ามา</span></button>
+    <button class="tile" data-go="lab"><b>Safe Cyber Lab</b><span>จำลอง SQLi / XSS ในแอป</span></button>
+    <button class="tile" data-go="dev"><b>เครื่องมือนักพัฒนา</b><span>Base64 / URL / UUID / เวลา</span></button>
+  </div>
+</section>
+
+<section id="pw">
+  <h2>สร้างรหัสผ่าน</h2><p class="sub">ใช้ crypto.getRandomValues และตัดอคติการสุ่มด้วย rejection sampling</p>
+  <div class="card">
+    <div class="out" id="pwOut" style="font-size:16px"></div>
+    <div class="bar"><i id="pwBar"></i></div><div id="pwInfo" class="sub" style="margin-top:6px"></div>
+    <label>ความยาว: <b id="pwLenV">20</b></label><input type="range" id="pwLen" min="8" max="64" value="20">
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="cU" checked>A-Z</label>
+      <label class="chk"><input type="checkbox" id="cL" checked>a-z</label>
+      <label class="chk"><input type="checkbox" id="cN" checked>0-9</label>
+      <label class="chk"><input type="checkbox" id="cS" checked>สัญลักษณ์</label>
+      <label class="chk"><input type="checkbox" id="cP">Passphrase</label>
+    </div>
+    <div class="row"><button class="p" id="pwGen">สร้างใหม่</button><button data-copy="pwOut">คัดลอก</button></div>
+  </div>
+  <div class="card"><label>ตรวจความแข็งแรงของรหัสผ่านที่มี (ไม่ถูกส่งออกจากเครื่อง)</label><input id="pwChk" type="text" autocomplete="off" spellcheck="false"><div id="pwChkOut" class="sub" style="margin-top:8px"></div></div>
+</section>
+
+<section id="aes">
+  <h2>เข้ารหัส AES-256-GCM</h2><p class="sub">Web Crypto API + PBKDF2-SHA256 (600,000 รอบ) สุ่ม Salt และ IV ใหม่ทุกครั้ง</p>
+  <div class="card">
+    <label>รหัสผ่าน</label><input id="aPw" type="password" autocomplete="off">
+    <label>ข้อความ (หรือข้อความเข้ารหัสแบบ Base64 สำหรับถอดรหัส)</label><textarea id="aTx"></textarea>
+    <div class="row"><button class="p" id="aEnc">เข้ารหัสข้อความ</button><button id="aDec">ถอดรหัสข้อความ</button><button data-copy="aOut">คัดลอก</button></div>
+    <div class="out" id="aOut"></div>
+  </div>
+  <div class="card">
+    <label>ไฟล์ (ประมวลผลในเครื่อง สูงสุด 200 MB)</label><input id="aFile" type="file">
+    <div class="row"><button class="p" id="aFEnc">เข้ารหัสไฟล์</button><button id="aFDec">ถอดรหัสไฟล์ .obx</button></div>
+    <div class="note">หากลืมรหัสผ่าน จะกู้ข้อมูลไม่ได้ เราไม่เก็บรหัสผ่านหรือคีย์</div>
+  </div>
+</section>
+
+<section id="hash">
+  <h2>Hash และตรวจความถูกต้องของไฟล์</h2><p class="sub">SHA-256 / SHA-384 / SHA-512</p>
+  <div class="card">
+    <label>อัลกอริทึม</label><select id="hAlg"><option>SHA-256</option><option>SHA-384</option><option>SHA-512</option></select>
+    <label>ข้อความ</label><textarea id="hTx"></textarea>
+    <label>หรือเลือกไฟล์</label><input id="hFile" type="file">
+    <div class="row"><button class="p" id="hGo">คำนวณ Hash</button><button data-copy="hOut">คัดลอก</button><button id="hDl">ดาวน์โหลดผล</button></div>
+    <div class="out" id="hOut"></div>
+    <label>เปรียบเทียบกับ Hash ที่ได้รับมา</label><input id="hCmp" autocomplete="off" spellcheck="false"><div id="hCmpOut" class="sub" style="margin-top:6px"></div>
+  </div>
+</section>
+
+<section id="url">
+  <h2>ตรวจลิงก์ก่อนเปิด</h2><p class="sub">วิเคราะห์ตามกฎพื้นฐานในเครื่อง ไม่เปิดลิงก์ ไม่ส่งไปที่ใด</p>
+  <div class="card"><label>วาง URL ที่ได้จาก QR หรือข้อความ</label><input id="uIn" type="text" inputmode="url" autocomplete="off" spellcheck="false">
+    <div class="row"><button class="p" id="uGo">ตรวจสอบ</button></div><div id="uOut"></div></div>
+</section>
+
+<section id="jwt">
+  <h2>JWT Inspector</h2><p class="sub">ถอดรหัส Header และ Payload เท่านั้น</p>
+  <div class="card"><label>วาง Token</label><textarea id="jIn"></textarea><div class="row"><button class="p" id="jGo">ถอดรหัส</button></div>
+    <div class="note">การถอดรหัสไม่เท่ากับการยืนยันลายเซ็น เครื่องมือนี้ไม่ได้ตรวจลายเซ็น จึงไม่ยืนยันว่า Token ถูกต้องหรือปลอดภัย</div><div id="jOut"></div></div>
+</section>
+
+<section id="hdr">
+  <h2>Security Headers</h2><p class="sub">วาง HTTP Response Headers ของเว็บไซต์ที่คุณมีสิทธิ์ตรวจสอบ ไม่มีการส่ง Request ใด ๆ</p>
+  <div class="card"><textarea id="xIn" placeholder="Content-Security-Policy: ...&#10;Set-Cookie: sid=...; Secure; HttpOnly"></textarea><div class="row"><button class="p" id="xGo">วิเคราะห์</button></div><div id="xOut"></div></div>
+</section>
+
+<section id="dev">
+  <h2>เครื่องมือนักพัฒนา</h2><p class="sub">Base64, URL, HTML entity, JSON, UUID, เวลา</p>
+  <div class="card"><label>ข้อมูลนำเข้า (หรือสีแบบ #22d3ee / 34,211,153)</label><textarea id="dIn"></textarea>
+    <label>ข้อความที่สอง (ใช้กับเปรียบเทียบข้อความ)</label><textarea id="dIn2"></textarea>
+    <div class="row">
+      <button data-d="b64e">Base64 เข้ารหัส</button><button data-d="b64d">Base64 ถอดรหัส</button>
+      <button data-d="ue">URL เข้ารหัส</button><button data-d="ud">URL ถอดรหัส</button>
+      <button data-d="he">HTML Entity</button><button data-d="hd">ถอด Entity</button>
+      <button data-d="js">จัดรูป JSON</button><button data-d="ts">แปลงเวลา</button><button data-d="uuid">UUID</button><button data-d="col">แปลงสี</button><button data-d="diff">เปรียบเทียบข้อความ</button><button data-d="tok">Token สุ่ม</button>
+    </div><div class="out" id="dOut"></div><div class="row"><button data-copy="dOut">คัดลอก</button></div></div>
+</section>
+<section id="lab">
+  <h2>Safe Cyber Lab</h2><p class="sub">ระบบจำลองในแอปเท่านั้น ไม่ส่งข้อมูลออกนอกเครื่อง และไม่รันโค้ดที่คุณพิมพ์</p>
+  <div class="card"><b>SQL Injection</b>
+    <p class="sub">ลองใส่ชื่อผู้ใช้ <code>admin' --</code> ในโหมดไม่ปลอดภัย แล้วสลับเป็นโหมดปลอดภัย</p>
+    <label>ชื่อผู้ใช้</label><input id="sqU" autocomplete="off" value="admin' --"><label>รหัสผ่าน</label><input id="sqP" autocomplete="off" value="wrong">
+    <label class="chk" style="margin-top:10px"><input type="checkbox" id="sqSafe">โหมดปลอดภัย (Parameterized Query)</label>
+    <div class="row"><button class="p" id="sqGo">ลองล็อกอิน</button></div><div id="sqOut"></div></div>
+  <div class="card"><b>Cross-Site Scripting (XSS)</b>
+    <p class="sub">ลองใส่ <code>&lt;img src=x onerror=alert(1)&gt;</code> ระบบจะแสดงเพียงว่าโค้ดจะถูกรันหรือไม่ โดยไม่รันจริง</p>
+    <label>ความคิดเห็น</label><input id="xsI" autocomplete="off" value="&lt;img src=x onerror=alert(1)&gt;">
+    <label class="chk" style="margin-top:10px"><input type="checkbox" id="xsSafe">โหมดปลอดภัย (Output Encoding)</label>
+    <div class="row"><button class="p" id="xsGo">แสดงความคิดเห็น</button></div><div id="xsOut"></div></div>
+</section>
+</main>
+<nav id="nav"></nav>
+<div id="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>
