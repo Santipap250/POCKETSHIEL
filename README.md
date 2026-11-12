@@ -38,6 +38,6 @@ npx serve .                 # หรือ python3 -m http.server 8080
 - Safe Cyber Lab เป็นการจำลองในแอป ไม่ส่ง Payload ออกไปที่ใด
 
 ## ข้อจำกัดของเวอร์ชันนี้
-ยังไม่มี: สแกน QR ด้วยกล้อง, QR Generator, สลับภาษา EN, รายการโปรด/ค้นหา, Recent Activity, Cookie/Auth/Password Lab
+ยังไม่มี: QR Generator, Cookie/Auth/Password Lab, แปลภาษาอังกฤษเฉพาะเมนูและหน้าแรก (หน้าเครื่องมือยังเป็นภาษาไทย) · สแกน QR ใช้ BarcodeDetector ของ Chrome Android ยังไม่ได้ทดสอบกับกล้องจริง
 
 License: MIT

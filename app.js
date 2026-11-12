@@ -4,9 +4,9 @@ function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clear
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function err(el,m){el.textContent='ข้อผิดพลาด: '+m}
 /* navigation */
-const tabs=[['home','หน้าแรก'],['pw','รหัสผ่าน'],['aes','AES'],['hash','Hash'],['url','ลิงก์'],['jwt','JWT'],['hdr','Headers'],['dev','Dev'],['lab','Lab']];
+const tabs=[['home','หน้าแรก'],['pw','รหัสผ่าน'],['aes','AES'],['hash','Hash'],['url','ลิงก์'],['jwt','JWT'],['hdr','Headers'],['dev','Dev'],['lab','Lab'],['qr','QR']];
 tabs.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;b.dataset.go=k;$('nav').appendChild(b)});
-function go(k){document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===k));document.querySelectorAll('[data-go]').forEach(b=>{if(b.closest('nav'))b.classList.toggle('on',b.dataset.go===k)});scrollTo(0,0);try{history.replaceState(null,'','#'+k)}catch(e){}}
+function go(k){stopCam();note(k);document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===k));document.querySelectorAll('[data-go]').forEach(b=>{if(b.closest('nav'))b.classList.toggle('on',b.dataset.go===k)});scrollTo(0,0);try{history.replaceState(null,'','#'+k)}catch(e){}}
 document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)go(g.dataset.go);const c=e.target.closest('[data-copy]');if(c){const t=$(c.dataset.copy).textContent;if(!t)return toast('ยังไม่มีข้อมูลให้คัดลอก');navigator.clipboard.writeText(t).then(()=>toast('คัดลอกแล้ว'),()=>toast('คัดลอกไม่สำเร็จ'))}});
 addEventListener('hashchange',()=>{const k=location.hash.slice(1);if(tabs.some(t=>t[0]===k))go(k)});
 $('theme').onclick=()=>{const r=document.documentElement;const dark=(r.dataset.theme||(matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'))==='dark';r.dataset.theme=dark?'light':'dark'};
@@ -92,5 +92,38 @@ const inj=!safe&&ok&&!(u==='admin'&&p==='S3cret!');
 o.innerHTML='<div class="out">'+esc(q)+'</div><p><span class="pill '+(ok?'bad':'good')+'">'+(inj?'ถูกเจาะ: เข้าสู่ระบบโดยไม่รู้รหัสผ่าน':ok?'ล็อกอินสำเร็จ (ข้อมูลถูกต้อง)':'ล็อกอินไม่สำเร็จ')+'</span></p><p class="sub">'+(inj?'ข้อมูลที่ผู้ใช้ใส่ถูกต่อเข้าไปในคำสั่ง SQL จึงเปลี่ยนความหมายของคำสั่ง เครื่องหมาย -- ทำให้เงื่อนไขรหัสผ่านถูกตัดทิ้ง วิธีป้องกัน: ใช้ Parameterized Query เสมอ ตรวจสอบ Input และให้สิทธิ์ฐานข้อมูลน้อยที่สุด':'ในโหมดปลอดภัย ข้อมูลถูกส่งแยกจากคำสั่ง จึงถูกมองเป็นค่าธรรมดา ไม่เปลี่ยนโครงสร้างคำสั่ง')+'</p>'};
 $('xsGo').onclick=()=>{const v=$('xsI').value,safe=$('xsSafe').checked,o=$('xsOut');const html=safe?esc(v):v;const risky=!safe&&(/<\s*script/i.test(v)||/<[^>]+\son\w+\s*=/i.test(v)||/javascript:/i.test(v));
 o.innerHTML='<label>HTML ที่หน้าเว็บจะได้รับ</label><div class="out">'+esc(html)+'</div><p><span class="pill '+(risky?'bad':'good')+'">'+(risky?'โค้ดนี้จะถูกรันในเบราว์เซอร์ผู้ใช้':'ปลอดภัย: แสดงเป็นข้อความธรรมดา')+'</span></p><p class="sub">'+(risky?'แอปนำข้อมูลของผู้ใช้ไปใส่ในหน้าเว็บโดยไม่เข้ารหัส เบราว์เซอร์จึงตีความเป็นโค้ด ผู้โจมตีอาจขโมย Session หรือแก้หน้าเว็บ วิธีป้องกัน: Output Encoding, ใช้ textContent แทน innerHTML และตั้ง Content-Security-Policy':'อักขระพิเศษถูกแปลงเป็น Entity เบราว์เซอร์จึงไม่ตีความเป็นโค้ด')+'</p>'};
+/* v1.1: favorites, search, recent, language, QR */
+const S={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const TT={pw:['Password generator','Secure random + passphrase'],aes:['AES-256 encryption','Text and files'],hash:['Hash & files','SHA-256 / 384 / 512'],url:['Link checker','Basic risk estimate'],jwt:['JWT Inspector','Decode, not verify'],hdr:['Security headers','Analyze what you paste'],dev:['Developer tools','Base64 / URL / UUID / time'],lab:['Safe Cyber Lab','SQLi / XSS simulation'],qr:['QR scanner','Scan, then check the link']};
+const NV={home:'Home',pw:'Password',aes:'AES',hash:'Hash',url:'Links',jwt:'JWT',hdr:'Headers',dev:'Dev',lab:'Lab',qr:'QR'};
+let lang=S.get('ps.lang','th');
+document.querySelectorAll('#nav button').forEach(b=>b.dataset.th=b.textContent);
+document.querySelectorAll('section').forEach(s=>{const h=s.querySelector('h2');if(h)h.dataset.th=h.textContent});
+$('banner').dataset.th=$('banner').innerHTML;$('hS').dataset.th=$('hS').textContent;
+document.querySelectorAll('.tile').forEach(t=>{const g=t.dataset.go,w=document.createElement('div');t.dataset.th=t.innerHTML;w.className='tw';w.dataset.g=g;t.parentNode.insertBefore(w,t);w.appendChild(t);const s=document.createElement('button');s.className='star';s.dataset.star=g;s.setAttribute('aria-label','Favorite');w.appendChild(s)});
+function nm(k){return lang==='en'?(TT[k]?TT[k][0]:NV[k]):(document.querySelector('#nav [data-go="'+k+'"]')||{}).dataset.th||k}
+function note(k){if(S.get('ps.recoff',false)||!NV[k]||k==='home')return;const r=S.get('ps.recent',[]).filter(x=>x!==k);r.unshift(k);S.set('ps.recent',r.slice(0,5));render()}
+function render(){const en=lang==='en',fav=S.get('ps.fav',[]),g=document.querySelector('#home .grid');
+[...g.children].sort((a,b)=>fav.includes(b.dataset.g)-fav.includes(a.dataset.g)).forEach(x=>g.appendChild(x));
+g.querySelectorAll('.tw').forEach(w=>{const k=w.dataset.g;w.firstChild.innerHTML=en&&TT[k]?'<b>'+TT[k][0]+'</b><span>'+TT[k][1]+'</span>':w.firstChild.dataset.th;w.lastChild.textContent=fav.includes(k)?'★':'☆'});
+document.querySelectorAll('#nav button').forEach(b=>b.textContent=en?NV[b.dataset.go]:b.dataset.th);
+document.querySelectorAll('section').forEach(s=>{const h=s.querySelector('h2');if(h&&s.id!=='home')h.textContent=en&&TT[s.id]?TT[s.id][0]:h.dataset.th});
+$('hT').textContent=en?'Choose a tool':'เลือกเครื่องมือ';$('hS').textContent=en?'Every tool runs for real on your device':$('hS').dataset.th;$('srch').placeholder=en?'Search tools':'ค้นหาเครื่องมือ';
+$('banner').innerHTML=en?'<b>Runs only in your browser.</b> Passwords, files and URLs are never sent to a server. Recent activity and favorites stay on this device and can be turned off. Tool screens are in Thai for now.':$('banner').dataset.th;
+const off=S.get('ps.recoff',false),rec=S.get('ps.recent',[]).filter(k=>NV[k]);
+$('recent').innerHTML='<label class="chk"><input type="checkbox" id="recOn" '+(off?'':'checked')+'>'+(en?'Keep recent activity (this device only)':'บันทึกการใช้งานล่าสุด (เฉพาะในเครื่อง)')+'</label>'+(!off&&rec.length?'<div class="row">'+rec.map(k=>'<button data-go="'+k+'">'+esc(nm(k))+'</button>').join('')+'<button id="recClr">'+(en?'Clear':'ล้าง')+'</button></div>':'')+'<div class="row"><button data-go="priv">'+(en?'Privacy & limits':'ความเป็นส่วนตัวและข้อจำกัด')+'</button></div>';
+$('lang').textContent=en?'ไทย':'EN';document.documentElement.lang=lang}
+document.addEventListener('click',e=>{const s=e.target.closest('[data-star]');if(s){const f=S.get('ps.fav',[]),k=s.dataset.star;S.set('ps.fav',f.includes(k)?f.filter(x=>x!==k):[...f,k]);render()}if(e.target.id==='recClr'){S.set('ps.recent',[]);render()}});
+document.addEventListener('change',e=>{if(e.target.id==='recOn'){S.set('ps.recoff',!e.target.checked);if(!e.target.checked)S.set('ps.recent',[]);render()}});
+$('lang').onclick=()=>{lang=lang==='en'?'th':'en';S.set('ps.lang',lang);render()};
+$('srch').oninput=()=>{const q=$('srch').value.trim().toLowerCase();document.querySelectorAll('#home .tw').forEach(w=>w.hidden=!!q&&!w.textContent.toLowerCase().includes(q)&&!(TT[w.dataset.g]||[]).join(' ').toLowerCase().includes(q))};
+let stream=null,raf=0;
+function stopCam(){cancelAnimationFrame(raf);if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}const v=$('qV');if(v){v.srcObject=null;v.style.display='none'}}
+function qrDone(v){stopCam();if(/^[a-z][a-z0-9+.-]*:\/\//i.test(v)||/^(www\.)?[\w-]+(\.[\w-]+)+(\/|$)/i.test(v)){$('uIn').value=v;go('url');$('uGo').click();toast('อ่าน QR แล้ว')}else{$('qMsg').textContent='QR นี้เป็นข้อความ ไม่ใช่ลิงก์: '+v.slice(0,300)}}
+async function detector(){if(!('BarcodeDetector' in window))throw new Error('เบราว์เซอร์นี้ไม่รองรับการอ่าน QR ในตัว ลอง Chrome บน Android หรือวางลิงก์ในหน้าตรวจลิงก์');return new BarcodeDetector({formats:['qr_code']})}
+$('qCam').onclick=async()=>{const m=$('qMsg');m.textContent='';try{const d=await detector();stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});const v=$('qV');v.srcObject=stream;v.style.display='block';await v.play();const loop=async()=>{if(!stream)return;try{const r=await d.detect(v);if(r.length)return qrDone(r[0].rawValue)}catch(x){}raf=requestAnimationFrame(loop)};loop()}catch(x){stopCam();m.textContent=x.name==='NotAllowedError'?'คุณปฏิเสธสิทธิ์กล้อง เปิดสิทธิ์กล้องของไซต์นี้ใน Chrome หรือใช้ปุ่มอัปโหลดภาพแทน':x.name==='NotFoundError'?'ไม่พบกล้องในอุปกรณ์':(x.message||'เปิดกล้องไม่ได้')}};
+$('qStop').onclick=stopCam;
+$('qFile').onchange=async e=>{const f=e.target.files[0],m=$('qMsg');m.textContent='';if(!f)return;try{const d=await detector(),r=await d.detect(await createImageBitmap(f));if(!r.length)throw new Error('ไม่พบ QR Code ในภาพ');qrDone(r[0].rawValue)}catch(x){m.textContent=x.message||'อ่านภาพไม่ได้'}e.target.value=''};
+render();
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').then(r=>r.addEventListener('updatefound',()=>toast('มีเวอร์ชันใหม่ รีโหลดเพื่ออัปเดต'))).catch(()=>{}));
 const k0=location.hash.slice(1);if(tabs.some(t=>t[0]===k0))go(k0);else go('home');

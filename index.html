@@ -8,7 +8,6 @@
 <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <meta name="theme-color" content="#060b1a">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="/style.css">
 </head>
@@ -16,13 +15,15 @@
 <header>
   <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#04101f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
   <div><h1>OBIX POCKETSHIELD</h1><small>เครื่องมือความปลอดภัยที่ทำงานในเครื่องคุณ</small></div>
-  <button id="theme" aria-label="สลับธีม">◐</button>
+  <button id="lang" aria-label="Language">EN</button><button id="theme" aria-label="สลับธีม">◐</button>
 </header>
 <main>
-<div class="priv"><b>ประมวลผลในเบราว์เซอร์เท่านั้น</b> รหัสผ่าน ไฟล์ และ URL ของคุณไม่ถูกส่งไปยังเซิร์ฟเวอร์ใด ๆ และไม่มีการเก็บข้อมูล</div>
+<div class="priv" id="banner"><b>ประมวลผลในเบราว์เซอร์เท่านั้น</b> รหัสผ่าน ไฟล์ และ URL ของคุณไม่ถูกส่งไปยังเซิร์ฟเวอร์ใด ๆ ประวัติการใช้งานและรายการโปรดเก็บในเครื่องคุณเท่านั้น และปิดได้</div>
 
 <section id="home" class="on">
-  <h2>เลือกเครื่องมือ</h2><p class="sub">ทุกเครื่องมือทำงานจริงในเครื่องของคุณ</p>
+  <h2 id="hT">เลือกเครื่องมือ</h2><p class="sub" id="hS">ทุกเครื่องมือทำงานจริงในเครื่องของคุณ</p>
+  <input id="srch" type="search" placeholder="ค้นหาเครื่องมือ" autocomplete="off" style="margin-bottom:12px">
+  <div id="recent" class="card"></div>
   <div class="grid">
     <button class="tile" data-go="pw"><b>สร้างรหัสผ่าน</b><span>สุ่มแบบปลอดภัย + Passphrase</span></button>
     <button class="tile" data-go="aes"><b>เข้ารหัส AES-256</b><span>ข้อความและไฟล์</span></button>
@@ -30,6 +31,7 @@
     <button class="tile" data-go="url"><b>ตรวจลิงก์</b><span>ประเมินความเสี่ยงเบื้องต้น</span></button>
     <button class="tile" data-go="jwt"><b>JWT Inspector</b><span>ถอดรหัส ไม่ใช่การยืนยัน</span></button>
     <button class="tile" data-go="hdr"><b>Security Headers</b><span>วิเคราะห์ที่คุณวางเข้ามา</span></button>
+    <button class="tile" data-go="qr"><b>สแกน QR</b><span>สแกนแล้วตรวจลิงก์ทันที</span></button>
     <button class="tile" data-go="lab"><b>Safe Cyber Lab</b><span>จำลอง SQLi / XSS ในแอป</span></button>
     <button class="tile" data-go="dev"><b>เครื่องมือนักพัฒนา</b><span>Base64 / URL / UUID / เวลา</span></button>
   </div>
@@ -107,6 +109,16 @@
       <button data-d="he">HTML Entity</button><button data-d="hd">ถอด Entity</button>
       <button data-d="js">จัดรูป JSON</button><button data-d="ts">แปลงเวลา</button><button data-d="uuid">UUID</button><button data-d="col">แปลงสี</button><button data-d="diff">เปรียบเทียบข้อความ</button><button data-d="tok">Token สุ่ม</button>
     </div><div class="out" id="dOut"></div><div class="row"><button data-copy="dOut">คัดลอก</button></div></div>
+</section>
+<section id="qr">
+  <h2>สแกน QR</h2><p class="sub">อ่านในเครื่อง ไม่ส่งภาพหรือลิงก์ไปที่ใด กล้องจะเปิดเมื่อคุณกดปุ่มเท่านั้น</p>
+  <div class="card"><div class="row" style="margin-top:0"><button class="p" id="qCam">เปิดกล้องสแกน</button><label class="chk" style="margin:0"><button onclick="this.nextElementSibling.click()" type="button">อัปโหลดภาพ QR</button><input id="qFile" type="file" accept="image/*" style="display:none"></label><button id="qStop">หยุดกล้อง</button></div>
+  <video id="qV" playsinline muted style="display:none;width:100%;border-radius:14px;margin-top:10px"></video><div id="qMsg" class="note"></div>
+  <p class="sub" style="margin-top:10px">ใช้ตัวอ่าน QR ของเบราว์เซอร์ (Chrome บน Android รองรับ) ถ้าอุปกรณ์ไม่รองรับ จะแจ้งให้ทราบ</p></div>
+</section>
+<section id="priv">
+  <h2>ความเป็นส่วนตัวและข้อจำกัด</h2>
+  <div class="card"><ul class="r"><li>รหัสผ่าน คีย์ ไฟล์ และ URL ถูกประมวลผลในเบราว์เซอร์ ไม่ถูกส่งออก ไม่มีบัญชีหรือ Tracking</li><li>ที่เก็บในเครื่องมีเพียงธีม ภาษา รายการโปรด และชื่อเครื่องมือที่ใช้ล่าสุด (ปิดและล้างได้)</li><li>ผลตรวจลิงก์เป็นการประเมินเบื้องต้นตามกฎ ไม่ใช่การรับรองว่าปลอดภัย</li><li>JWT Inspector ถอดรหัสเท่านั้น ไม่ตรวจลายเซ็น</li><li>ลืมรหัสผ่านไฟล์ที่เข้ารหัส แล้วกู้คืนไม่ได้</li><li>แอปนี้ไม่สแกนมัลแวร์หรือไฟล์ในเครื่อง ไม่ใช่โปรแกรมป้องกันไวรัส และเบราว์เซอร์ไม่อนุญาตให้ตรวจการตั้งค่าระบบ</li><li>Safe Cyber Lab เป็นการจำลองในแอปเท่านั้น</li></ul></div>
 </section>
 <section id="lab">
   <h2>Safe Cyber Lab</h2><p class="sub">ระบบจำลองในแอปเท่านั้น ไม่ส่งข้อมูลออกนอกเครื่อง และไม่รันโค้ดที่คุณพิมพ์</p>
